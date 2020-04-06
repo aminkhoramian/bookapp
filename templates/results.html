@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block heading %}
+    Hello!
+{% endblock %}
+
+{% block body %}
+    Hello, {{ name }}!
+	
+	<ul id="booklist">
+    {% for re in res %}
+        <li> <a href={{ "/results/%s%s"|format('id', loop.index0) }}  > {{re.title}} </a>  </li>
+    {% endfor %}
+    </ul>
+
+{% endblock %}

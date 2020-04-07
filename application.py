@@ -1,3 +1,4 @@
+import requests
 from flask import Flask, session, render_template, request, redirect, url_for, flash
 from flask_session import Session
 from sqlalchemy import create_engine
@@ -63,8 +64,9 @@ def alikale(name):
         res=session['res']
         session['cmbook']=db.execute("SELECT cm, usname FROM comments JOIN users ON users.id= user_id WHERE book_id=:book_id", {"book_id":res[int(idd)].id}).fetchall()
         cmbook=session['cmbook']
-        resapi = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "Y5fYXr4UjSLiWiSWUcdQQ", "isbns": res[int(idd)].isbn })          
-        return render_template("searchresults.html",author=res[int(idd)].author, title=res[int(idd)].title, isbn=res[int(idd)].isbn, year=res[int(idd)].year, cmbook=cmbook, bookid=res[int(idd)].id)
+        resapi = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "Y5fYXr4UjSLiWiSWUcdQQ", "isbns": "9781632168146" })
+#        res[int(idd)].isbn          
+        return render_template("searchresults.html",author=res[int(idd)].author, title=res[int(idd)].title, isbn=res[int(idd)].isbn, year=res[int(idd)].year, cmbook=cmbook, bookid=res[int(idd)].id, resapi=resapi.json())
     
 @app.route("/submiting", methods=["POST"])
 def submiting():

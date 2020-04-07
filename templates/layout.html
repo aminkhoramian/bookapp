@@ -10,16 +10,19 @@
         <title>My Website!</title>
     </head>
     <body>
-        <h1>
+		<h1>
+			{% block heading %}
+			{% endblock %}
+		</h1>
+		<div> </div>
+        <h2>
 		{% if session['name'] %}
-			<a href={{ url_for('logout') }}  > log out </a>
+			<div> Hello {{name}} ! </div>
+			<a href={{ url_for('logout') }}  >log out </a>
 		{% else %}
 			<a href={{ url_for('index') }}  > log in </a>
 		{% endif %}
-		{% block heading %}
-			
-		{% endblock %}
-		</h1>
+		</h2>
 
         {% block body %}
         {% endblock %}

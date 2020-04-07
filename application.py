@@ -57,14 +57,15 @@ def results():
 @app.route("/results/<name>")
 def alikale(name):
     idd=name[2:]
-#    name=request.form.get("jj")
     if not session['user_id']:
         return render_template("hello.html",name=name)
     else:
         res=session['res']
         session['cmbook']=db.execute("SELECT cm, usname FROM comments JOIN users ON users.id= user_id WHERE book_id=:book_id", {"book_id":res[int(idd)].id}).fetchall()
-        cmbook=session['cmbook']           
+        cmbook=session['cmbook']
+        resapi = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "Y5fYXr4UjSLiWiSWUcdQQ", "isbns": res[int(idd)].isbn })          
         return render_template("searchresults.html",author=res[int(idd)].author, title=res[int(idd)].title, isbn=res[int(idd)].isbn, year=res[int(idd)].year, cmbook=cmbook, bookid=res[int(idd)].id)
+    
 @app.route("/submiting", methods=["POST"])
 def submiting():
     cm=request.form.get("comment")

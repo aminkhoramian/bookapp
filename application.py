@@ -1,5 +1,5 @@
 import requests
-from flask import Flask, session, render_template, request, redirect, url_for, flash
+from flask import Flask, session, render_template, request, redirect, url_for, flash, jsonify
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -64,9 +64,14 @@ def alikale(name):
         res=session['res']
         session['cmbook']=db.execute("SELECT cm, usname FROM comments JOIN users ON users.id= user_id WHERE book_id=:book_id", {"book_id":res[int(idd)].id}).fetchall()
         cmbook=session['cmbook']
-        resapi = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "Y5fYXr4UjSLiWiSWUcdQQ", "isbns": "9781632168146" })
-#        res[int(idd)].isbn          
-        return render_template("searchresults.html",author=res[int(idd)].author, title=res[int(idd)].title, isbn=res[int(idd)].isbn, year=res[int(idd)].year, cmbook=cmbook, bookid=res[int(idd)].id, resapi=resapi.json())
+        isbn=res[int(idd)].isbn
+        resapi = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "Y5fYXr4UjSLiWiSWUcdQQ", "isbns": isbn })
+        if resapi.status_code == 404:
+            resapi= "No rating"
+        else:
+             resapi=resapi.json()
+             resapi=resapi["books"][0]["average_rating"]
+        return render_template("searchresults.html",author=res[int(idd)].author, title=res[int(idd)].title, isbn=res[int(idd)].isbn, year=res[int(idd)].year, cmbook=cmbook, bookid=res[int(idd)].id, resapi=resapi)
     
 @app.route("/submiting", methods=["POST"])
 def submiting():
@@ -83,3 +88,14 @@ def logout():
     session.pop('user_id',None)
     print('You were logged out')
     return (redirect(url_for('index')))
+@app.route("/api/<name>")
+def api(name):
+    bookapi=db.execute("SELECT title, author, isbn, year, count(*) FROM books JOIN comments ON comments.book_id=books.id WHERE books.isbn= :isb GROUP BY books.title, books.author, books.isbn, books.year", {"isb":name}).fetchall()
+    return jsonify({
+                    "title": bookapi[0].title,
+                    "author": bookapi[0].author,
+                    "year": bookapi[0].year,
+                    "isbn": bookapi[0].isbn,
+                    "review_count": bookapi[0].count,
+                    "average_score": 5.0
+                    })
